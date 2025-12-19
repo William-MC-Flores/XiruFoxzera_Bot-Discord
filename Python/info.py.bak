@@ -1,0 +1,77 @@
+import discord
+from discord.ext import commands
+
+class Ajuda(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name="ajuda", help="Mostra todos os comandos disponíveis no bot.")
+    async def ajuda(self, ctx):
+        embed = discord.Embed(
+            title="📚 Lista de Comandos",
+            description="Aqui estão os comandos disponíveis, organizados por categoria:",
+            color=discord.Color.green()
+        )
+
+        embed.add_field(
+            name="🛡️ Moderação",
+            value=(
+                "`!warn <usuário> [motivo]` — Adverte um usuário.\n"
+                "`!verwarns <usuário>` — Ver advertências do usuário.\n"
+                "`!clearwarns <usuário>` — Remove todas as advertências.\n"
+                "`!unwarn <usuário> <índice>` — Remove advertência específica.\n"
+                "`!warnslist` — Lista todos com advertências.\n"
+                "`!mute <usuário> [tempo] [motivo]` — Silencia o usuário.\n"
+                "`!unmute <usuário>` — Remove o silêncio.\n"
+                "`!limpar <quantidade>` — Apaga mensagens do canal.\n"
+                "`!kick <usuário> [motivo]` — Expulsa o usuário.\n"
+                "`!ban <usuário> [motivo]` — Bane o usuário.\n"
+                "`!setupmute` — Cria/Configura cargo Mutado.\n"
+                "⚠️ *Advertência automática por spam após 5 mensagens em 10 segundos.*"
+            ),
+            inline=False
+        )
+        embed.add_field(
+            name="ℹ️ Informação",
+            value=(
+                "`!ajuda` — Mostra essa mensagem de ajuda.\n"
+                "`!terms` — Termos de Serviço do bot.\n"
+                "`!privacy` — Política de Privacidade do bot."
+            ),
+            inline=False
+        )
+        embed.add_field(
+            name="⚙️ Utilitários",
+            value=(
+                "`!ping` — Responde Pong e checa latência.\n"
+                "`!avatar [usuário]` — Mostra o avatar de um usuário.\n"
+                "`!userinfo [usuário]` — Info detalhada do usuário.\n"
+                "`!serverinfo` — Informações do servidor.\n"
+                "`!botinfo` — Informações sobre o bot.\n"
+                "`!say <mensagem>` — O bot repete a mensagem.\n"
+                "`!votacao` — Inicia uma votação com botões.\n"
+                "`!sorteio [tempo]` — Sorteio entre quem reagir.\n"
+                "`!coinflip` — Joga cara ou coroa.\n"
+                "`!dado` — Rola um dado de 6 lados.\n"
+                "`!8ball <pergunta>` — Responde uma pergunta.\n"
+                "`!embed <título> <descrição>` — Cria uma mensagem embed."
+            ),
+            inline=False
+        )
+        embed.set_footer(text="Use os comandos com '!' no chat para ativar.")
+        await ctx.send(embed=embed)
+
+    @commands.command(name="terms", help="Exibe os Termos de Serviço do bot.")
+    async def terms(self, ctx):
+        await ctx.send(
+            "📄 Você pode ler os **Termos de Serviço** do bot aqui:\nhttps://github.com/WillFlores-Fox/Bot_Server"
+        )
+
+    @commands.command(name="privacy", help="Exibe a Política de Privacidade do bot.")
+    async def privacy(self, ctx):
+        await ctx.send(
+            "🔒 Você pode ler a **Política de Privacidade** do bot aqui:\nhttps://github.com/WillFlores-Fox/Bot_Server"
+        )
+
+async def setup(bot):
+    await bot.add_cog(Ajuda(bot))
