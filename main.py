@@ -9,7 +9,11 @@ from discord.ext import commands
 from keep_alive import keep_alive
 import asyncio
 import traceback
+from dotenv import load_dotenv
 from config import GUILD_ID, STATUS_ROTACAO, STATUS_INTERVALO
+
+# Carrega variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Configuração de intents
 intents = discord.Intents.all()
