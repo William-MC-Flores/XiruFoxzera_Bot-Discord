@@ -47,10 +47,10 @@ KEEP_ALIVE_PORT = 8080
 # Configurações de status do bot
 STATUS_ROTACAO = [
     {"tipo": "game", "texto": "Mateando com a xiruzada🧉 /!ajuda/"},
-    {"tipo": "watching", "texto": "o churras do Freddy🍖 /!ajuda/"},
-    {"tipo": "listening", "texto": "uma milonga eletrônico🎶 /!ajuda/"},
-    {"tipo": "game", "texto": "Caçando animatrônicos no galpão👻 /!ajuda/"},
-    {"tipo": "watching", "texto": "o CTG ser invadido pelo Foxy🔪 /!ajuda/"},
+    {"tipo": "watching", "texto": "o churras dos cabas🍖 /!ajuda/"},
+    {"tipo": "listening", "texto": "uma milonga bagual🎶 /!ajuda/"},
+    {"tipo": "game", "texto": "Caçando lobisomem no galpão👻 /!ajuda/"},
+    {"tipo": "watching", "texto": "o CTG ser invadido pelo chinelão🔪 /!ajuda/"},
     {"tipo": "game", "texto": "Jogando truco com os cabas🃏 /!ajuda/"}
 ]
 
