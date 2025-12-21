@@ -215,7 +215,7 @@ class Ajuda(commands.Cog):
                 "**4. Alterações**\n"
                 "• Os termos podem ser alterados a qualquer momento\n\n"
                 "Para mais informações, acesse:\n"
-                "https://github.com/WillFlores-Fox/Bot_Server"
+                "https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord"
             ),
             color=discord.Color.blue()
         )
@@ -244,7 +244,7 @@ class Ajuda(commands.Cog):
                 "• Você pode solicitar remoção dos seus dados\n"
                 "• Entre em contato com os administradores\n\n"
                 "Para mais informações:\n"
-                "https://github.com/WillFlores-Fox/Bot_Server"
+                "https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord"
             ),
             color=discord.Color.purple()
         )

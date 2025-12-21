@@ -1,4 +1,4 @@
-# 🤖 Bot Discord - Xiru Aftonzera
+# � Bot Discord - Xiru Foxzera
 
 Bot de moderação e utilidades para Discord com sistema completo de gerenciamento de servidor.
 
@@ -210,11 +210,12 @@ Este projeto é de código aberto para uso pessoal e educacional.
 
 ## 👤 Autor
 
-**Will Flores**
-- GitHub: [@WillFlores-Fox](https://github.com/WillFlores-Fox)
+**William MC Flores**
+- GitHub: [@William-MC-Flores](https://github.com/William-MC-Flores)
+- Repositório: [XiruAftonzera_Bot-Discord](https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord)
 
 ---
 
 ⭐ Se este projeto foi útil, considere dar uma estrela!
 
-**Status:** ✅ Pronto para produção | **Versão:** 2.0
+**Status:** ✅ Pronto para produção | **Versão:** 1.2.1
