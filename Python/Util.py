@@ -5,6 +5,7 @@ Comandos diversos para diversão e utilidade no servidor
 import discord
 from discord.ext import commands
 from discord.ui import View, Button
+from discord.utils import utcnow
 import platform
 import asyncio
 import random
@@ -97,7 +98,7 @@ class Utilitarios(commands.Cog):
         # Calcula tempo no servidor
         tempo_servidor = None
         if membro.joined_at:
-            delta = datetime.utcnow() - membro.joined_at
+            delta = utcnow() - membro.joined_at
             dias = delta.days
             tempo_servidor = f"{dias} dia(s)"
         

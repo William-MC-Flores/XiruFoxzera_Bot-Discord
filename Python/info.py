@@ -51,6 +51,15 @@ class Ajuda(commands.Cog):
         )
         
         embed.add_field(
+            name="⭐ Níveis e XP",
+            value=(
+                "Sistema de experiência e ranking.\n"
+                "`!ajuda niveis` para detalhes"
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
             name="⚙️ Utilitários",
             value=(
                 "Comandos úteis e de diversão.\n"
@@ -70,7 +79,7 @@ class Ajuda(commands.Cog):
             inline=False
         )
         
-        embed.set_footer(text=f"Bot criado por Will Flores | Use !terms e !privacy para mais informações")
+        embed.set_footer(text=f"Bot criado por William MC Flores | Use !terms e !privacy para mais informações")
         
         await ctx.send(embed=embed)
 
@@ -143,6 +152,42 @@ class Ajuda(commands.Cog):
                     "`!privacy` — Política de Privacidade\n"
                     "`!ping` — Verifica latência do bot\n"
                     "`!botinfo` — Informações do bot"
+                ),
+                inline=False
+            )
+        
+        elif categoria in ["niveis", "níveis", "xp", "level"]:
+            embed = discord.Embed(
+                title="⭐ Sistema de Níveis e XP",
+                description="Ganhe experiência conversando no servidor!",
+                color=discord.Color.gold()
+            )
+            
+            embed.add_field(
+                name="📊 Como Funciona",
+                value=(
+                    "• Ganhe **10 XP** a cada mensagem enviada\n"
+                    "• Cooldown de 60 segundos entre ganhos\n"
+                    "• Fórmula de nível: `√(XP/100)`\n"
+                    "• Receba notificação ao subir de nível!"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🎮 Comandos",
+                value=(
+                    "`!perfil [@usuário]` — Ver perfil e progresso\n"
+                    "`!ranking [página]` — Top 10 usuários com mais XP"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🛡️ Comandos Admin",
+                value=(
+                    "`!addxp @usuário <valor>` — Adiciona XP manualmente\n"
+                    "`!resetperfil @usuário` — Reseta XP e nível"
                 ),
                 inline=False
             )
