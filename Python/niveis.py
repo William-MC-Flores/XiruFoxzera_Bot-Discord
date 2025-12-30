@@ -1347,7 +1347,7 @@ class SistemaNiveis(commands.Cog):
         embed.set_footer(text="Use !loja para comprar mais itens")
         await ctx.send(embed=embed)
     
-    @commands.command(name="addmoedas", aliases=["addcoins", "darmoedas"])
+    @commands.command(name="addmoedas", aliases=["addcoins"])
     @commands.is_owner()
     async def addmoedas(self, ctx, membro: discord.Member, quantidade: int):
         """
