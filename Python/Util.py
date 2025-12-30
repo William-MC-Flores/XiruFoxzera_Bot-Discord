@@ -348,6 +348,8 @@ class Utilitarios(commands.Cog):
     # ============================================
     # COMANDOS DE DIVERSÃO
     # ============================================
+    # COMANDOS DE DIVERSÃO - MANTIDOS
+    # ============================================
     @commands.command(name="coinflip", aliases=["moeda", "cf"])
     async def coinflip(self, ctx):
         """Joga uma moeda (cara ou coroa)"""
@@ -381,35 +383,6 @@ class Utilitarios(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(name="8ball", aliases=["bola8"])
-    async def oito_ball(self, ctx, *, pergunta: str):
-        """Faz uma pergunta à bola mágica"""
-        respostas = [
-            "✅ Sim",
-            "❌ Não",
-            "🤷 Talvez",
-            "👍 Provavelmente",
-            "💯 Com certeza",
-            "🚫 Nunca",
-            "🤔 Acho que sim",
-            "⏰ Pergunte depois",
-            "😕 Melhor não responder",
-            "🎯 Sem dúvida",
-            "❓ Não sei dizer",
-            "🌟 É certo"
-        ]
-        
-        resposta = random.choice(respostas)
-        
-        embed = discord.Embed(
-            title="🎱 Bola Mágica",
-            color=discord.Color.purple()
-        )
-        embed.add_field(name="Pergunta", value=pergunta, inline=False)
-        embed.add_field(name="Resposta", value=resposta, inline=False)
-        
-        await ctx.send(embed=embed)
-
     @commands.command(name="escolher", aliases=["choose", "escolha"])
     async def escolher(self, ctx, *opcoes: str):
         """Escolhe aleatoriamente entre as opções fornecidas"""
@@ -427,6 +400,26 @@ class Utilitarios(commands.Cog):
         embed.set_footer(text=f"{len(opcoes)} opções disponíveis")
         
         await ctx.send(embed=embed)
+
+    # ============================================
+    # COMANDO 8BALL - DESABILITADO (menos usado)
+    # Para reativar, remova os comentários abaixo
+    # ============================================
+    # @commands.command(name="8ball", aliases=["bola8"])
+    # async def oito_ball(self, ctx, *, pergunta: str):
+    #     """Faz uma pergunta à bola mágica"""
+    #     respostas = [
+    #         "✅ Sim", "❌ Não", "🤷 Talvez",
+    #         "👍 Provavelmente", "💯 Com certeza", "🚫 Nunca",
+    #         "🤔 Acho que sim", "⏰ Pergunte depois",
+    #         "😕 Melhor não responder", "🎯 Sem dúvida",
+    #         "❓ Não sei dizer", "🌟 É certo"
+    #     ]
+    #     resposta = random.choice(respostas)
+    #     embed = discord.Embed(title="🎱 Bola Mágica", color=discord.Color.purple())
+    #     embed.add_field(name="Pergunta", value=pergunta, inline=False)
+    #     embed.add_field(name="Resposta", value=resposta, inline=False)
+    #     await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Utilitarios(bot))

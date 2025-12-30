@@ -60,6 +60,15 @@ class Ajuda(commands.Cog):
         )
         
         embed.add_field(
+            name="💰 Economia e Loja",
+            value=(
+                "Sistema de moedas, loja e inventário.\n"
+                "`!ajuda economia` para detalhes"
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
             name="⚙️ Utilitários",
             value=(
                 "Comandos úteis e de diversão.\n"
@@ -167,27 +176,115 @@ class Ajuda(commands.Cog):
                 name="📊 Como Funciona",
                 value=(
                     "• Ganhe **10 XP** a cada mensagem enviada\n"
-                    "• Cooldown de 60 segundos entre ganhos\n"
+                    "• Ganhe **1 moeda** a cada mensagem enviada\n"
+                    "• Máximo de 50 XP por minuto (anti-spam)\n"
                     "• Fórmula de nível: `√(XP/100)`\n"
-                    "• Receba notificação ao subir de nível!"
+                    "• Ganhe **10 moedas** ao subir de nível!\n"
+                    "• Receba notificação ao subir de nível!\n"
+                    "• Desbloqueie conquistas ao atingir marcos!"
                 ),
                 inline=False
             )
             
             embed.add_field(
-                name="🎮 Comandos",
+                name="🎮 Comandos de Perfil",
                 value=(
-                    "`!perfil [@usuário]` — Ver perfil e progresso\n"
-                    "`!ranking [página]` — Top 10 usuários com mais XP"
+                    "`!perfil [@usuário]` — Ver perfil completo\n"
+                    "`!editarperfil bio <texto>` — Definir bio (máx 200 chars)\n"
+                    "`!editarperfil status <texto>` — Definir status (máx 50 chars)\n"
+                    "`!editarperfil limpar` — Limpar bio e status\n"
+                    "`!rank [página]` — Top 10 usuários com mais XP"
                 ),
                 inline=False
             )
             
             embed.add_field(
-                name="🛡️ Comandos Admin",
+                name="🏆 Conquistas",
                 value=(
-                    "`!addxp @usuário <valor>` — Adiciona XP manualmente\n"
-                    "`!resetperfil @usuário` — Reseta XP e nível"
+                    "`!conquistas [@usuário]` — Ver conquistas desbloqueadas\n\n"
+                    "Desbloqueie conquistas ao:\n"
+                    "• Enviar mensagens (1, 100, 1000+)\n"
+                    "• Subir de nível (1, 5, 10, 20, 50+)\n"
+                    "• Acumular XP (10k, 100k+)"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="👑 Comandos Fundador",
+                value=(
+                    "`!addxp @usuário <valor>` — Adiciona XP (Owner)\n"
+                    "`!resetperfil @usuário` — Reseta perfil (Owner)"
+                ),
+                inline=False
+            )
+        
+        elif categoria in ["economia", "moedas", "loja", "shop"]:
+            embed = discord.Embed(
+                title="💰 Sistema de Economia e Loja",
+                description="Ganhe e gaste moedas no servidor!",
+                color=discord.Color.gold()
+            )
+            
+            embed.add_field(
+                name="💵 Como Ganhar Moedas",
+                value=(
+                    "• **+1 moeda** por mensagem enviada\n"
+                    "• **+10 moedas** ao subir de nível\n"
+                    "• Receba moedas de outros usuários\n"
+                    "• Ganhe recompensas de eventos (Admin)"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="💰 Comandos de Moedas",
+                value=(
+                    "`!saldo [@usuário]` — Ver saldo de moedas\n"
+                    "`!pagar @usuário <valor>` — Transferir moedas\n"
+                    "`!ranking [página]` — Top 10 mais ricos"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🏪 Sistema de Loja",
+                value=(
+                    "`!loja` — Ver resumo de categorias\n"
+                    "`!loja <categoria>` — Ver itens da categoria\n"
+                    "`!loja todos` — Ver todos os itens\n"
+                    "`!comprar <ID>` — Comprar item\n"
+                    "`!inventario [@usuário]` — Ver itens comprados"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🎨 Categorias da Loja",
+                value=(
+                    "**decoracao** — Decorações para perfil\n"
+                    "**badge** — Badges exclusivas\n"
+                    "**cargo** — Cargos especiais\n"
+                    "**boost** — Multiplicadores de XP/moedas"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🛡️ Comandos Administrador",
+                value=(
+                    "`!darmoedas @usuário <valor>` — Dar moedas (Admin)\n"
+                    "💡 *Limite de 10.000 moedas por uso*"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="👑 Comandos Fundador",
+                value=(
+                    "`!addmoedas @usuário <valor>` — Adicionar moedas (Owner)\n"
+                    "`!removermoedas @usuário <valor>` — Remover moedas (Owner)\n"
+                    "`!setmoedas @usuário <valor>` — Definir saldo (Owner)"
                 ),
                 inline=False
             )
@@ -214,7 +311,6 @@ class Ajuda(commands.Cog):
                 value=(
                     "`!coinflip` — Cara ou coroa\n"
                     "`!dado [lados]` — Rola um dado\n"
-                    "`!8ball <pergunta>` — Bola mágica\n"
                     "`!escolher <op1> <op2> ...` — Escolhe aleatoriamente"
                 ),
                 inline=False
@@ -234,7 +330,8 @@ class Ajuda(commands.Cog):
         else:
             await ctx.send(
                 "❌ Categoria não encontrada!\n"
-                "Categorias disponíveis: `moderacao`, `info`, `utilitarios`"
+                "📚 **Categorias disponíveis:**\n"
+                "`moderacao`, `info`, `niveis`, `economia`, `utilitarios`"
             )
             return
         

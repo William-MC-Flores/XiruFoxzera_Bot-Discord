@@ -2,6 +2,7 @@
 Sistema de Interações Automáticas
 Responde automaticamente a certas mensagens no servidor
 """
+import discord
 from discord.ext import commands
 
 class Interacoes(commands.Cog):
@@ -97,7 +98,6 @@ class Interacoes(commands.Cog):
             await ctx.send("📭 Nenhuma resposta automática configurada.")
             return
         
-        import discord
         embed = discord.Embed(
             title="💬 Respostas Automáticas",
             description=f"Total: {len(self.respostas)} resposta(s)",

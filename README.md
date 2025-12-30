@@ -113,7 +113,8 @@ XiruAftonzera_Bot-Discord/
 | Categoria | Comandos |
 |-----------|----------|
 | 🛡️ Moderação | `!warn`, `!mute`, `!kick`, `!ban`, `!limpar` |
-| ⭐ Níveis & XP | `!perfil`, `!ranking`, `!addxp`, `!resetperfil` |
+| ⭐ Níveis & XP | `!perfil`, `!ranking`, `!conquistas`, `!editarperfil` |
+| 🏆 Admin XP | `!addxp`, `!resetperfil` |
 | ℹ️ Informação | `!ajuda`, `!userinfo`, `!serverinfo` |
 | 🎮 Diversão | `!coinflip`, `!dado`, `!8ball`, `!sorteio` |
 | ⚙️ Utilitários | `!avatar`, `!ping`, `!votacao` |
