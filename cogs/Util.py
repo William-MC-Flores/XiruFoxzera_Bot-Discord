@@ -10,7 +10,7 @@ import platform
 import asyncio
 import random
 from datetime import datetime
-from Python.logger import send_log
+from cogs.logger import send_log
 from config import COOLDOWNS
 
 class VotacaoView(View):

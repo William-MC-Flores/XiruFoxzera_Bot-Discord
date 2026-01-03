@@ -2,9 +2,9 @@
 Sistema de Logs e Auditoria
 Registra automaticamente eventos importantes do servidor
 """
-import discord
+
 from discord.ext import commands
-from Python.logger import send_log
+from cogs.logger import send_log
 
 class Logs(commands.Cog):
     """Monitora e registra eventos do servidor"""

@@ -138,7 +138,7 @@ async def load_cogs():
     for filename in os.listdir('./Python'):
         if filename.endswith('.py') and filename not in ['logger.py', '__init__.py']:
             try:
-                await bot.load_extension(f'Python.{filename[:-3]}')
+                await bot.load_extension(f'cogs.{filename[:-3]}')
                 print(f'  ✔️ {filename[:-3]}')
                 cogs_carregados += 1
             except Exception as e:
@@ -160,7 +160,7 @@ async def setup_hook():
 async def reload_cog(ctx, cog_name: str):
     """Recarrega um cog específico (apenas owner)"""
     try:
-        await bot.reload_extension(f'Python.{cog_name}')
+        await bot.reload_extension(f'cogs.{cog_name}')
         await ctx.send(f"✅ Módulo `{cog_name}` recarregado com sucesso!")
     except Exception as e:
         await ctx.send(f"❌ Erro ao recarregar `{cog_name}`: {e}")

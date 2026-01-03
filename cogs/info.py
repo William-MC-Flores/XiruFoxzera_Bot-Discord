@@ -77,18 +77,9 @@ class Ajuda(commands.Cog):
             inline=False
         )
         
-        embed.add_field(
-            name="👋 Sistema",
-            value=(
-                "• Boas-vindas automáticas\n"
-                "• Sistema de cadastro com reações\n"
-                "• Logs automáticos de eventos\n"
-                "• Anti-spam automático"
-            ),
-            inline=False
-        )
+
         
-        embed.set_footer(text=f"Bot criado por William MC Flores | Use !terms e !privacy para mais informações")
+        embed.set_footer(text=f"Bot criado por William MC Flores")
         
         await ctx.send(embed=embed)
 
@@ -157,10 +148,10 @@ class Ajuda(commands.Cog):
                 name="📋 Comandos Disponíveis",
                 value=(
                     "`!ajuda` — Mostra esta mensagem\n"
-                    "`!terms` — Termos de Serviço\n"
-                    "`!privacy` — Política de Privacidade\n"
                     "`!ping` — Verifica latência do bot\n"
-                    "`!botinfo` — Informações do bot"
+                    "`!botinfo` — Informações do bot\n"
+                    "`!terms` — Termos de Serviço\n"
+                    "`!privacy` — Política de Privacidade"
                 ),
                 inline=False
             )
@@ -203,9 +194,11 @@ class Ajuda(commands.Cog):
                 value=(
                     "`!conquistas [@usuário]` — Ver conquistas desbloqueadas\n\n"
                     "Desbloqueie conquistas ao:\n"
-                    "• Enviar mensagens (1, 100, 1000+)\n"
-                    "• Subir de nível (1, 5, 10, 20, 50+)\n"
-                    "• Acumular XP (10k, 100k+)"
+                    "• Enviar mensagens (1, 100, 1000)\n"
+                    "• Ficar em canais de voz (10 horas)\n"
+                    "• Completar 1 ano no servidor\n"
+                    "• Subir de nível (1, 5, 10, 20, 50)\n"
+                    "• Acumular XP (10k, 100k)"
                 ),
                 inline=False
             )
@@ -254,7 +247,20 @@ class Ajuda(commands.Cog):
                     "`!loja <categoria>` — Ver itens da categoria\n"
                     "`!loja todos` — Ver todos os itens\n"
                     "`!comprar <ID>` — Comprar item\n"
-                    "`!inventario [@usuário]` — Ver itens comprados"
+                    "`!inventario [@usuário]` — Ver itens comprados\n"
+                    "`!usaritem <ID>` — Aplicar item ao perfil"
+                ),
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🎨 Personalização",
+                value=(
+                    "`!customizar` — Menu de personalização\n"
+                    "`!customizar cor <#hex>` — Cor do perfil\n"
+                    "`!customizar titulo <texto>` — Título customizado\n"
+                    "`!customizar limpar` — Remover customizações\n\n"
+                    "⚠️ **Banners só pela loja** (`!loja banner`)"
                 ),
                 inline=False
             )
@@ -262,7 +268,9 @@ class Ajuda(commands.Cog):
             embed.add_field(
                 name="🎨 Categorias da Loja",
                 value=(
-                    "**decoracao** — Decorações para perfil\n"
+                    "**banner** — Banners de perfil (arquivos locais)\n"
+                    "**cor** — Cores personalizadas de perfil\n"
+                    "**titulo** — Títulos especiais\n"
                     "**badge** — Badges exclusivas\n"
                     "**cargo** — Cargos especiais\n"
                     "**boost** — Multiplicadores de XP/moedas"
@@ -355,9 +363,7 @@ class Ajuda(commands.Cog):
                 "• O bot é fornecido \"como está\"\n"
                 "• Pode haver períodos de indisponibilidade para manutenção\n\n"
                 "**4. Alterações**\n"
-                "• Os termos podem ser alterados a qualquer momento\n\n"
-                "Para mais informações, acesse:\n"
-                "https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord"
+                "• Os termos podem ser alterados a qualquer momento"
             ),
             color=discord.Color.blue()
         )
@@ -387,9 +393,7 @@ class Ajuda(commands.Cog):
                 "• Backup automático para segurança\n\n"
                 "**Seus Direitos**\n"
                 "• Você pode solicitar remoção dos seus dados\n"
-                "• Entre em contato com os administradores\n\n"
-                "Para mais informações:\n"
-                "https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord"
+                "• Entre em contato com os administradores"
             ),
             color=discord.Color.purple()
         )

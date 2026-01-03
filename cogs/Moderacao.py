@@ -7,7 +7,7 @@ from discord.ext import commands
 import json
 import os
 import asyncio
-from Python.logger import send_log
+from cogs.logger import send_log
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from config import WARNS_CONFIG, SPAM_CONFIG, ROLES_MODERACAO

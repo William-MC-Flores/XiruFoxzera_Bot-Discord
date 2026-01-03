@@ -6,8 +6,7 @@ import discord
 from discord.ext import commands
 import sqlite3
 import math
-import asyncio
-from typing import Optional
+import os
 from datetime import datetime
 
 class SistemaNiveis(commands.Cog):
@@ -19,6 +18,8 @@ class SistemaNiveis(commands.Cog):
         self.xp_por_mensagem = 10  # XP ganho por mensagem
         self.max_xp_por_minuto = 50  # Limite anti-spam
         self.xp_historico = {}  # Rastreia XP ganho no último minuto por usuário
+        self.contador_mensagens = {}  # Contador total de mensagens por usuário
+        self.tempo_voz = {}  # Rastreia tempo em canais de voz
         self._init_database()
     
     def _init_database(self):
@@ -36,10 +37,37 @@ class SistemaNiveis(commands.Cog):
                 moedas INTEGER DEFAULT 0,
                 bio TEXT DEFAULT '',
                 status_personalizado TEXT DEFAULT '',
+                cor_perfil TEXT DEFAULT '#7289DA',
+                banner_perfil TEXT DEFAULT '',
+                titulo_perfil TEXT DEFAULT '',
+                item_ativo_borda TEXT DEFAULT '',
+                item_ativo_fundo TEXT DEFAULT '',
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Adiciona novas colunas se não existirem (migração)
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN cor_perfil TEXT DEFAULT '#7289DA'")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN banner_perfil TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN titulo_perfil TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN item_ativo_borda TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN item_ativo_fundo TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
         
         # Cria tabela de conquistas
         cursor.execute('''
@@ -73,9 +101,16 @@ class SistemaNiveis(commands.Cog):
                 preco INTEGER NOT NULL,
                 tipo_item TEXT NOT NULL,
                 descricao TEXT DEFAULT '',
+                arquivo TEXT DEFAULT '',
                 disponivel INTEGER DEFAULT 1
             )
         ''')
+        
+        # Adiciona coluna arquivo se não existir (migração)
+        try:
+            cursor.execute("ALTER TABLE loja ADD COLUMN arquivo TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass
         
         # Cria tabela de inventário
         cursor.execute('''
@@ -116,11 +151,25 @@ class SistemaNiveis(commands.Cog):
         except sqlite3.OperationalError:
             pass
         
+        # Adiciona coluna total_mensagens se não existir
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN total_mensagens INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+        
+        # Adiciona coluna tempo_voz_segundos se não existir
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN tempo_voz_segundos INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+        
         # Insere conquistas padrão se não existirem
         conquistas_padrao = [
             ("Primeira Mensagem", "Enviou a primeira mensagem", "✨", "mensagens", 1),
             ("Conversador", "Enviou 100 mensagens", "💬", "mensagens", 100),
-            ("Tagarela", "Enviou 1000 mensagens", "🗣️", "mensagens", 1000),
+            ("Falador", "Enviou 1000 mensagens", "🗣️", "mensagens", 1000),
+            ("Ativo", "Ficou 10 horas em canais de voz", "🎤", "voz", 36000),
+            ("Veterano do Servidor", "1 ano no servidor", "👑", "tempo", 365),
             ("Novato", "Alcançou o nível 1", "🌱", "nivel", 1),
             ("Iniciante", "Alcançou o nível 5", "🔰", "nivel", 5),
             ("Experiente", "Alcançou o nível 10", "⭐", "nivel", 10),
@@ -141,39 +190,48 @@ class SistemaNiveis(commands.Cog):
         
         # Insere itens padrão da loja se não existirem
         itens_padrao = [
-            # Decorações de perfil
-            ("Borda Dourada", 150, "decoração", "Borda dourada elegante para seu perfil"),
-            ("Borda Arco-Íris", 200, "decoração", "Borda colorida com efeito arco-íris"),
-            ("Fundo Estrelas", 180, "decoração", "Fundo estrelado para seu perfil"),
-            ("Fundo Galaxia", 250, "decoração", "Fundo espacial com galáxias"),
-            ("Título Personalizado", 400, "decoração", "Define um título único que aparece no seu perfil"),
-            ("Cor Personalizada", 300, "decoração", "Permite escolher uma cor para seu nome no ranking"),
+            # Banners (arquivos locais)
+            ("Banner Espaço", 300, "banner", "Banner temático espacial com estrelas", "banners/espaco.png"),
+            ("Banner Floresta", 250, "banner", "Banner com paisagem de floresta", "banners/floresta.png"),
+            ("Banner Oceano", 280, "banner", "Banner com vista do oceano", "banners/oceano.png"),
+            ("Banner Montanhas", 320, "banner", "Banner com montanhas majestosas", "banners/montanhas.png"),
+            ("Banner Cidade", 350, "banner", "Banner com paisagem urbana", "banners/cidade.png"),
+            
+            # Cores de perfil
+            ("Cor Vermelho Fogo", 150, "cor", "Cor vermelha vibrante #FF4444", ""),
+            ("Cor Azul Oceano", 150, "cor", "Cor azul profundo #0099FF", ""),
+            ("Cor Verde Esmeralda", 150, "cor", "Cor verde brilhante #00FF88", ""),
+            ("Cor Roxo Real", 150, "cor", "Cor roxa elegante #9B59B6", ""),
+            ("Cor Dourado", 200, "cor", "Cor dourada premium #FFD700", ""),
+            
+            # Títulos especiais
+            ("Título Lendário", 400, "titulo", "Adiciona o título 'Lendário' ao perfil", ""),
+            ("Título Mestre", 350, "titulo", "Adiciona o título 'Mestre' ao perfil", ""),
+            ("Título Campeão", 300, "titulo", "Adiciona o título 'Campeão' ao perfil", ""),
             
             # Badges especiais
-            ("Badge VIP", 500, "badge", "Badge exclusivo VIP exibido no perfil"),
-            ("Badge Desenvolvedor", 800, "badge", "Badge especial de desenvolvedor"),
-            ("Badge Estrela", 350, "badge", "Badge de estrela brilhante"),
-            ("Badge Coroa", 600, "badge", "Badge de coroa real"),
-            ("Badge Diamante", 1000, "badge", "Badge exclusivo de diamante"),
+            ("Badge VIP", 500, "badge", "Badge exclusivo VIP exibido no perfil", ""),
+            ("Badge Desenvolvedor", 800, "badge", "Badge especial de desenvolvedor", ""),
+            ("Badge Estrela", 350, "badge", "Badge de estrela brilhante", ""),
+            ("Badge Coroa", 600, "badge", "Badge de coroa real", ""),
+            ("Badge Diamante", 1000, "badge", "Badge exclusivo de diamante", ""),
             
             # Cargos exclusivos
-            ("Cargo VIP", 1500, "cargo", "Cargo VIP exclusivo com benefícios especiais"),
-            ("Cargo Elite", 2500, "cargo", "Cargo Elite para membros dedicados"),
-            ("Cargo Lendário", 5000, "cargo", "Cargo Lendário para os mais ativos"),
-            ("Cargo Apoiador", 1000, "cargo", "Cargo especial de apoiador da comunidade"),
+            ("Cargo VIP", 1500, "cargo", "Cargo VIP exclusivo com benefícios especiais", ""),
+            ("Cargo Elite", 2500, "cargo", "Cargo Elite para membros dedicados", ""),
+            ("Cargo Lendário", 5000, "cargo", "Cargo Lendário para os mais ativos", ""),
             
-            # Boosts e utilidades
-            ("Boost de XP (1h)", 100, "boost", "Dobra o ganho de XP por 1 hora"),
-            ("Boost de XP (24h)", 500, "boost", "Dobra o ganho de XP por 24 horas"),
-            ("Boost de Moedas (1h)", 150, "boost", "Dobra o ganho de moedas por 1 hora"),
-            ("Carta Especial", 50, "item", "Uma carta especial para personalizar seu perfil"),
+            # Boosts
+            ("Boost de XP (1h)", 100, "boost", "Dobra o ganho de XP por 1 hora", ""),
+            ("Boost de XP (24h)", 500, "boost", "Dobra o ganho de XP por 24 horas", ""),
+            ("Boost de Moedas (1h)", 150, "boost", "Dobra o ganho de moedas por 1 hora", ""),
         ]
         
-        for nome, preco, tipo, desc in itens_padrao:
+        for nome, preco, tipo, desc, arquivo in itens_padrao:
             try:
                 cursor.execute(
-                    'INSERT OR IGNORE INTO loja (nome_item, preco, tipo_item, descricao) VALUES (?, ?, ?, ?)',
-                    (nome, preco, tipo, desc)
+                    'INSERT OR IGNORE INTO loja (nome_item, preco, tipo_item, descricao, arquivo) VALUES (?, ?, ?, ?, ?)',
+                    (nome, preco, tipo, desc, arquivo)
                 )
             except sqlite3.IntegrityError:
                 pass
@@ -332,18 +390,27 @@ class SistemaNiveis(commands.Cog):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Atualiza XP, nível E moedas em uma única transação
+        # Atualiza XP, nível, moedas E contador de mensagens em uma única transação
         cursor.execute('''
             UPDATE usuarios 
-            SET xp = ?, nivel = ?, moedas = moedas + ?
+            SET xp = ?, nivel = ?, moedas = moedas + ?, total_mensagens = total_mensagens + 1
             WHERE id_discord = ?
         ''', (xp_novo, nivel_novo, total_moedas, member.id))
+        
+        # Busca dados atualizados para verificação de conquistas
+        cursor.execute('SELECT total_mensagens, tempo_voz_segundos, data_criacao FROM usuarios WHERE id_discord = ?', (member.id,))
+        row = cursor.fetchone()
+        total_mensagens = row[0] if row else 0
+        tempo_voz = row[1] if row else 0
+        data_criacao = row[2] if row else None
         
         conn.commit()
         conn.close()
         
-        # Verifica conquistas desbloqueadas
-        novas_conquistas = await self._verificar_conquistas(member.id, xp_novo, nivel_novo)
+        # Verifica conquistas desbloqueadas (passa dados completos)
+        novas_conquistas = await self._verificar_conquistas(
+            member.id, xp_novo, nivel_novo, total_mensagens, tempo_voz, data_criacao
+        )
         
         return {
             'subiu_nivel': nivel_novo > nivel_anterior,
@@ -354,7 +421,7 @@ class SistemaNiveis(commands.Cog):
             'novas_conquistas': novas_conquistas
         }
     
-    async def _verificar_conquistas(self, user_id: int, xp: int, nivel: int) -> list:
+    async def _verificar_conquistas(self, user_id: int, xp: int, nivel: int, total_mensagens: int, tempo_voz: int, data_criacao: str) -> list:
         """
         Verifica e desbloqueia conquistas para o usuário
         
@@ -362,6 +429,9 @@ class SistemaNiveis(commands.Cog):
             user_id: ID do Discord do usuário
             xp: XP atual do usuário
             nivel: Nível atual do usuário
+            total_mensagens: Total de mensagens enviadas
+            tempo_voz: Tempo em voz (segundos)
+            data_criacao: Data de criação do perfil
             
         Returns:
             Lista de conquistas recém-desbloqueadas
@@ -377,8 +447,14 @@ class SistemaNiveis(commands.Cog):
         cursor.execute('SELECT conquista_id FROM usuarios_conquistas WHERE id_discord = ?', (user_id,))
         desbloqueadas = set(row[0] for row in cursor.fetchall())
         
-        # Calcula número de mensagens (aproximado)
-        mensagens = xp // 10
+        # Calcula dias desde criação
+        dias_no_servidor = 0
+        if data_criacao:
+            try:
+                data_inicio = datetime.fromisoformat(data_criacao)
+                dias_no_servidor = (datetime.now() - data_inicio).days
+            except:
+                pass
         
         novas_conquistas = []
         
@@ -389,11 +465,15 @@ class SistemaNiveis(commands.Cog):
             
             # Verifica requisito
             desbloqueou = False
-            if req_tipo == "mensagens" and mensagens >= req_valor:
+            if req_tipo == "mensagens" and total_mensagens >= req_valor:
                 desbloqueou = True
             elif req_tipo == "nivel" and nivel >= req_valor:
                 desbloqueou = True
             elif req_tipo == "xp" and xp >= req_valor:
+                desbloqueou = True
+            elif req_tipo == "voz" and tempo_voz >= req_valor:
+                desbloqueou = True
+            elif req_tipo == "tempo" and dias_no_servidor >= req_valor:
                 desbloqueou = True
             
             if desbloqueou:
@@ -490,6 +570,78 @@ class SistemaNiveis(commands.Cog):
                 )
                 await message.channel.send(embed=embed)
     
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        """
+        Rastreia tempo em canais de voz para a conquista "Ativo"
+        """
+        # Ignora bots
+        if member.bot:
+            return
+        
+        tempo_atual = datetime.now()
+        
+        # Entrou em um canal de voz
+        if before.channel is None and after.channel is not None:
+            self.tempo_voz[member.id] = tempo_atual
+        
+        # Saiu de um canal de voz
+        elif before.channel is not None and after.channel is None:
+            if member.id in self.tempo_voz:
+                tempo_entrada = self.tempo_voz[member.id]
+                segundos_em_voz = int((tempo_atual - tempo_entrada).total_seconds())
+                
+                # Atualiza tempo total de voz no banco
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                cursor.execute('''
+                    UPDATE usuarios 
+                    SET tempo_voz_segundos = tempo_voz_segundos + ?
+                    WHERE id_discord = ?
+                ''', (segundos_em_voz, member.id))
+                
+                # Busca dados para verificar conquistas
+                cursor.execute('''
+                    SELECT xp, nivel, total_mensagens, tempo_voz_segundos, data_criacao 
+                    FROM usuarios WHERE id_discord = ?
+                ''', (member.id,))
+                row = cursor.fetchone()
+                
+                conn.commit()
+                conn.close()
+                
+                if row:
+                    xp, nivel, total_mensagens, tempo_voz_total, data_criacao = row
+                    # Verifica conquistas de voz
+                    novas_conquistas = await self._verificar_conquistas(
+                        member.id, xp, nivel, total_mensagens, tempo_voz_total, data_criacao
+                    )
+                    
+                    # Notifica sobre conquistas de voz
+                    if novas_conquistas:
+                        for conquista in novas_conquistas:
+                            # Envia em um canal geral (você pode personalizar)
+                            for guild in self.bot.guilds:
+                                if member in guild.members:
+                                    # Tenta achar um canal de texto para enviar
+                                    text_channel = guild.system_channel or guild.text_channels[0] if guild.text_channels else None
+                                    if text_channel:
+                                        embed = discord.Embed(
+                                            title="🏆 Conquista Desbloqueada!",
+                                            description=f"{member.mention} desbloqueou uma conquista!",
+                                            color=discord.Color.purple()
+                                        )
+                                        embed.add_field(
+                                            name=f"{conquista['emoji']} {conquista['nome']}",
+                                            value=conquista['descricao'],
+                                            inline=False
+                                        )
+                                        await text_channel.send(embed=embed)
+                                    break
+                
+                # Remove do rastreamento
+                del self.tempo_voz[member.id]
+    
     @commands.command(name="perfil", aliases=["profile", "nivel", "level"])
     async def perfil(self, ctx, membro: discord.Member = None):
         """
@@ -530,14 +682,32 @@ class SistemaNiveis(commands.Cog):
         conquistas = cursor.fetchall()
         conn.close()
         
-        # Cria embed
+        # Cria embed com cor personalizada
+        cor_perfil = usuario.get('cor_perfil', '#7289DA')
+        try:
+            cor_embed = discord.Color.from_str(cor_perfil)
+        except:
+            cor_embed = membro.color if membro.color != discord.Color.default() else discord.Color.blue()
+        
+        # Título personalizado (se houver)
+        titulo_display = f"📊 {usuario.get('titulo_perfil', '')} {membro.display_name}".strip() if usuario.get('titulo_perfil') else f"📊 Perfil de {membro.display_name}"
+        
         embed = discord.Embed(
-            title=f"📊 Perfil de {membro.display_name}",
-            color=membro.color if membro.color != discord.Color.default() else discord.Color.blue()
+            title=titulo_display,
+            color=cor_embed
         )
         
         avatar_url = membro.avatar.url if membro.avatar else membro.default_avatar.url
         embed.set_thumbnail(url=avatar_url)
+        
+        # Banner personalizado (SOMENTE arquivos locais, não URLs)
+        arquivo_banner = None
+        if usuario.get('banner_perfil'):
+            # banner_perfil agora guarda o nome do arquivo, não URL
+            caminho_banner = f"images/{usuario['banner_perfil']}"
+            if os.path.exists(caminho_banner):
+                arquivo_banner = discord.File(caminho_banner, filename="banner.png")
+                embed.set_image(url="attachment://banner.png")
         
         # Status personalizado (se houver)
         if usuario.get('status_personalizado'):
@@ -548,6 +718,20 @@ class SistemaNiveis(commands.Cog):
             embed.add_field(
                 name="📝 Bio",
                 value=usuario['bio'],
+                inline=False
+            )
+        
+        # Itens ativos (se houver)
+        itens_ativos = []
+        if usuario.get('item_ativo_borda'):
+            itens_ativos.append(f"🖼️ {usuario['item_ativo_borda']}")
+        if usuario.get('item_ativo_fundo'):
+            itens_ativos.append(f"🎨 {usuario['item_ativo_fundo']}")
+        
+        if itens_ativos:
+            embed.add_field(
+                name="✨ Itens Ativos",
+                value="\n".join(itens_ativos),
                 inline=False
             )
         
@@ -600,9 +784,13 @@ class SistemaNiveis(commands.Cog):
                 inline=False
             )
         
-        embed.set_footer(text=f"ID: {membro.id} • Use !editarperfil para personalizar")
+        embed.set_footer(text=f"ID: {membro.id} • Use !customizar para personalizar")
         
-        await ctx.send(embed=embed)
+        # Envia com arquivo de banner se existir
+        if arquivo_banner:
+            await ctx.send(embed=embed, file=arquivo_banner)
+        else:
+            await ctx.send(embed=embed)
     
     @commands.command(name="ranking", aliases=["rank", "leaderboard", "top"])
     async def ranking(self, ctx, pagina: int = 1):
@@ -1024,6 +1212,291 @@ class SistemaNiveis(commands.Cog):
             await ctx.send(f"❌ Ocorreu um erro ao buscar as conquistas. Tente novamente mais tarde.\n"
                           f"💡 Se o problema persistir, contate um administrador.")
     
+    @commands.command(name="customizar", aliases=["customize", "personalizar"])
+    async def customizar(self, ctx, opcao: str = None, *, valor: str = None):
+        """
+        Personaliza a aparência do seu perfil
+        
+        Uso: 
+        !customizar cor <código_hex>
+        !customizar titulo <seu título>
+        !customizar limpar
+        
+        ⚠️ Banners só podem ser obtidos comprando na loja (!loja banner)
+        
+        Exemplos:
+        !customizar cor #FF5733
+        !customizar titulo 🎮 Gamer Profissional
+        """
+        if not opcao:
+            # Mostra ajuda
+            usuario = self._obter_usuario(ctx.author.id, str(ctx.author.name))
+            
+            embed = discord.Embed(
+                title="🎨 Customizar Perfil",
+                description="Personalize a aparência do seu perfil!",
+                color=discord.Color.from_str(usuario.get('cor_perfil', '#7289DA'))
+            )
+            
+            embed.add_field(
+                name="🎨 Cor do Perfil",
+                value=f"`!customizar cor <código_hex>`\n"
+                      f"Cor atual: `{usuario.get('cor_perfil', '#7289DA')}`\n"
+                      f"Exemplo: `!customizar cor #FF5733`",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="👑 Título",
+                value=f"`!customizar titulo <seu título>`\n"
+                      f"Título atual: {usuario.get('titulo_perfil', '*Nenhum*')}\n"
+                      f"Exemplo: `!customizar titulo 🎮 Gamer`",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🖼️ Banner",
+                value=f"⚠️ **Banners só podem ser comprados na loja**\n"
+                      f"Use `!loja banner` para ver opções disponíveis\n"
+                      f"Banner atual: {usuario.get('banner_perfil', '*Nenhum*')}",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🧹 Limpar",
+                value="`!customizar limpar` - Remove todas as customizações",
+                inline=False
+            )
+            
+            await ctx.send(embed=embed)
+            return
+        
+        opcao = opcao.lower()
+        
+        if opcao == "limpar":
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE usuarios 
+                SET cor_perfil = '#7289DA', 
+                    banner_perfil = '', 
+                    titulo_perfil = '',
+                    ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (ctx.author.id,))
+            conn.commit()
+            conn.close()
+            
+            await ctx.send("✅ Todas as personalizações foram removidas!")
+            return
+        
+        if not valor:
+            await ctx.send(f"❌ Você precisa fornecer um valor! Exemplo: `!customizar {opcao} <valor>`")
+            return
+        
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        if opcao in ["cor", "color"]:
+            # Valida código hexadecimal
+            if not valor.startswith('#'):
+                valor = '#' + valor
+            
+            try:
+                discord.Color.from_str(valor)  # Valida a cor
+            except:
+                await ctx.send("❌ Código de cor inválido! Use formato hexadecimal (ex: #FF5733)")
+                conn.close()
+                return
+            
+            cursor.execute('''
+                UPDATE usuarios 
+                SET cor_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (valor, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Cor Atualizada!",
+                description=f"🎨 Sua nova cor de perfil",
+                color=discord.Color.from_str(valor)
+            )
+            embed.add_field(name="Código", value=valor)
+            await ctx.send(embed=embed)
+            
+        elif opcao in ["titulo", "title", "título"]:
+            if len(valor) > 50:
+                await ctx.send("❌ O título deve ter no máximo 50 caracteres!")
+                conn.close()
+                return
+            
+            cursor.execute('''
+                UPDATE usuarios 
+                SET titulo_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (valor, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Título Atualizado!",
+                description=f"👑 **Novo título:**\n{valor}",
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("❌ Opção inválida! Use: `cor` ou `titulo`\n💡 Banners só podem ser comprados na loja (`!loja banner`)")
+            conn.close()
+    
+    @commands.command(name="usaritem", aliases=["useitem", "aplicar", "equipar"])
+    async def usaritem(self, ctx, id_item: int = None):
+        """
+        Aplica um item do inventário ao seu perfil
+        
+        Uso: !usaritem <ID do item>
+        """
+        if id_item is None:
+            await ctx.send("❌ Especifique o ID do item! Use `!inventario` para ver seus itens.")
+            return
+        
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Verifica se o usuário possui o item
+        cursor.execute('''
+            SELECT l.nome_item, l.tipo_item, l.descricao, l.arquivo
+            FROM inventario i
+            JOIN loja l ON i.id_item = l.id
+            WHERE i.id_discord = ? AND i.id_item = ?
+        ''', (ctx.author.id, id_item))
+        
+        item = cursor.fetchone()
+        
+        if not item:
+            await ctx.send("❌ Você não possui este item no inventário!")
+            conn.close()
+            return
+        
+        nome_item, tipo_item, descricao, arquivo = item
+        
+        # Aplica o item baseado no tipo
+        if tipo_item == "banner":
+            # Aplica banner (arquivo local)
+            if not arquivo:
+                await ctx.send("❌ Este banner não possui arquivo associado!")
+                conn.close()
+                return
+            
+            cursor.execute('''
+                UPDATE usuarios 
+                SET banner_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (arquivo, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Banner Aplicado!",
+                description=f"**{nome_item}** agora é seu banner de perfil!",
+                color=discord.Color.green()
+            )
+            embed.set_footer(text="Use !perfil para ver as mudanças")
+            
+            # Tenta mostrar preview do banner
+            caminho_banner = f"images/{arquivo}"
+            if os.path.exists(caminho_banner):
+                arquivo_preview = discord.File(caminho_banner, filename="preview.png")
+                embed.set_image(url="attachment://preview.png")
+                await ctx.send(embed=embed, file=arquivo_preview)
+            else:
+                await ctx.send(embed=embed)
+        
+        elif tipo_item == "cor":
+            # Extrai cor do nome ou descrição
+            cores_mapeadas = {
+                "Cor Vermelho Fogo": "#FF4444",
+                "Cor Azul Oceano": "#0099FF",
+                "Cor Verde Esmeralda": "#00FF88",
+                "Cor Roxo Real": "#9B59B6",
+                "Cor Dourado": "#FFD700"
+            }
+            
+            cor_hex = cores_mapeadas.get(nome_item, "#7289DA")
+            
+            cursor.execute('''
+                UPDATE usuarios 
+                SET cor_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (cor_hex, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Cor Aplicada!",
+                description=f"**{nome_item}** agora é a cor do seu perfil!",
+                color=discord.Color.from_str(cor_hex)
+            )
+            embed.add_field(name="Código", value=cor_hex)
+            embed.set_footer(text="Use !perfil para ver as mudanças")
+            await ctx.send(embed=embed)
+        
+        elif tipo_item == "titulo":
+            # Extrai título do nome
+            titulos_mapeados = {
+                "Título Lendário": "⚔️ Lendário",
+                "Título Mestre": "🎓 Mestre",
+                "Título Campeão": "🏆 Campeão"
+            }
+            
+            titulo = titulos_mapeados.get(nome_item, nome_item.replace("Título ", ""))
+            
+            cursor.execute('''
+                UPDATE usuarios 
+                SET titulo_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (titulo, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Título Aplicado!",
+                description=f"**{titulo}** agora é seu título de perfil!",
+                color=discord.Color.green()
+            )
+            embed.set_footer(text="Use !perfil para ver as mudanças")
+            await ctx.send(embed=embed)
+            
+        elif tipo_item == "badge":
+            cursor.execute('''
+                UPDATE usuarios 
+                SET item_ativo_borda = ?, ultima_atualizacao = CURRENT_TIMESTAMP
+                WHERE id_discord = ?
+            ''', (nome_item, ctx.author.id))
+            conn.commit()
+            conn.close()
+            
+            embed = discord.Embed(
+                title="✅ Badge Aplicada!",
+                description=f"**{nome_item}** foi aplicada ao seu perfil!",
+                color=discord.Color.green()
+            )
+            embed.set_footer(text="Use !perfil para ver as mudanças")
+            await ctx.send(embed=embed)
+            
+        elif tipo_item == "boost":
+            await ctx.send(f"🚀 **{nome_item}** ativado!\n⚠️ Sistema de boosts temporários será implementado em breve.")
+            conn.close()
+            
+        elif tipo_item == "cargo":
+            await ctx.send(f"👑 **{nome_item}** - Entre em contato com um administrador para receber seu cargo especial!")
+            conn.close()
+            
+        else:
+            await ctx.send(f"ℹ️ **{nome_item}** - {descricao}")
+            conn.close()
+
+    
     @commands.command(name='loja', aliases=['shop', 'store'])
     async def loja(self, ctx, categoria: str = None):
         """
@@ -1054,20 +1527,23 @@ class SistemaNiveis(commands.Cog):
                 title="🏪 Loja Virtual",
                 description=f"💰 Suas moedas: **{usuario['moedas']:,}**\n\n"
                             f"**Escolha uma categoria:**\n"
-                            f"`!loja decoracao` — Decorações de perfil\n"
-                            f"`!loja badge` — Badges especiais\n"
-                            f"`!loja cargo` — Cargos exclusivos\n"
-                            f"`!loja boost` — Boosts e utilidades\n"
+                            f"`!loja banner` — Banners para perfil\n"
+                            f"`!loja cor` — Cores de perfil\n"
+                            f"`!loja titulo` — Títulos especiais\n"
+                            f"`!loja badge` — Badges exclusivas\n"
+                            f"`!loja cargo` — Cargos especiais\n"
+                            f"`!loja boost` — Boosts temporários\n"
                             f"`!loja todos` — Ver todos os itens",
                 color=discord.Color.green()
             )
             
             emoji_categorias = {
-                "decoração": "✨",
+                "banner": "🖼️",
+                "cor": "🎨",
+                "titulo": "👑",
                 "badge": "🏅",
-                "cargo": "👑",
-                "boost": "⚡",
-                "item": "📦"
+                "cargo": "⚔️",
+                "boost": "⚡"
             }
             
             for tipo, qtd, min_preco, max_preco in categorias:
@@ -1109,11 +1585,12 @@ class SistemaNiveis(commands.Cog):
             tipo_atual = None
             for item_id, nome, preco, tipo, desc in todos_itens:
                 emoji_tipo = {
-                    "decoração": "✨",
+                    "banner": "🖼️",
+                    "cor": "🎨",
+                    "titulo": "👑",
                     "badge": "🏅",
-                    "cargo": "👑",
-                    "boost": "⚡",
-                    "item": "📦"
+                    "cargo": "⚔️",
+                    "boost": "⚡"
                 }.get(tipo, "🎁")
                 
                 pode_comprar = "✅" if usuario['moedas'] >= preco else "❌"
@@ -1134,9 +1611,15 @@ class SistemaNiveis(commands.Cog):
         
         # Filtra por categoria específica
         categoria_map = {
-            "decoracao": "decoração",
-            "decoração": "decoração",
-            "decoracoes": "decoração",
+            "banner": "banner",
+            "banners": "banner",
+            "cor": "cor",
+            "cores": "cor",
+            "color": "cor",
+            "titulo": "titulo",
+            "títulos": "titulo",
+            "titulos": "titulo",
+            "title": "titulo",
             "badge": "badge",
             "badges": "badge",
             "cargo": "cargo",
@@ -1148,7 +1631,7 @@ class SistemaNiveis(commands.Cog):
         tipo_filtro = categoria_map.get(categoria.lower())
         
         if not tipo_filtro:
-            await ctx.send("❌ Categoria inválida! Use: decoracao, badge, cargo, boost ou todos")
+            await ctx.send("❌ Categoria inválida! Use: banner, cor, titulo, badge, cargo, boost ou todos")
             conn.close()
             return
         
@@ -1167,11 +1650,12 @@ class SistemaNiveis(commands.Cog):
             return
         
         emoji_tipo = {
-            "decoração": "✨",
+            "banner": "🖼️",
+            "cor": "🎨",
+            "titulo": "👑",
             "badge": "🏅",
-            "cargo": "👑",
-            "boost": "⚡",
-            "item": "📦"
+            "cargo": "⚔️",
+            "boost": "⚡"
         }.get(tipo_filtro, "🎁")
         
         embed = discord.Embed(

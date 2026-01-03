@@ -1,224 +1,267 @@
-# � Bot Discord - Xiru Foxzera
+# 🧉 Xiru Aftonzera Bot
 
-Bot de moderação e utilidades para Discord com sistema completo de gerenciamento de servidor.
+<div align="center">
 
-## 🚀 Início Rápido
+![Discord](https://img.shields.io/badge/Discord-Bot-7289DA?style=for-the-badge&logo=discord&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Ativo-success?style=for-the-badge)
 
-### ☁️ Discloud (Recomendado)
+**Bot completo de moderação, economia e gamificação para servidores Discord**
 
-**Hospedagem principal** - Rápido, confiável e gratuito!
+[Documentação](#-documentação) • [Instalação](#-instalação) • [Comandos](#-comandos) • [Contribuir](CONTRIBUTING.md)
 
-1. **Preparar arquivos:**
-   - Configure seu token no arquivo `.env`
-   - Certifique-se que `discloud.config` está configurado
-
-2. **Upload:**
-   - Acesse [Discloud](https://discloud.app)
-   - Faça upload do projeto completo (incluindo `.env`)
-   - Aguarde o build e inicialização
-
-3. **Pronto!** ✅ Seu bot estará online 24/7
-
-### 🔄 Replit (Alternativo)
-
-Para testes ou hospedagem alternativa:
-
-1. Configure `DISCORD_TOKEN` nos Secrets
-2. Clique em **Run**
-3. Pronto! ✅
-
-### 💻 Local (Desenvolvimento)
-
-```bash
-# Instalar dependências
-pip install -r requirements.txt
-
-# Configurar token no .env
-echo "DISCORD_TOKEN=seu_token_aqui" > .env
-
-# Executar
-python3 main.py
-```
-
-## 📚 Documentação
-
-- 📖 [Documentação Completa](docs/README.md)
-- 🔧 [Solução de Problemas](docs/TROUBLESHOOTING.md)
-- 📊 [Status do Projeto](docs/STATUS.md)
-- 🗂️ [Estrutura e Organização](docs/ORGANIZACAO.md)
-
-## 🛠️ Scripts Úteis
-
-```bash
-# Verificar projeto
-./scripts/dev.sh verificar
-
-# Testar conexão
-./scripts/dev.sh testar
-
-# Executar bot
-./scripts/dev.sh executar
-```
-
-## 📁 Estrutura do Projeto
-
-```
-XiruAftonzera_Bot-Discord/
-├── 📄 main.py              # Arquivo principal do bot
-├── ⚙️ config.py            # Configurações centralizadas
-├── 🔄 keep_alive.py        # Keep-alive para Replit
-├── 📦 requirements.txt     # Dependências Python
-├── 🔧 discloud.config      # Configuração Discloud
-├── 🔐 .env                 # Variáveis de ambiente (TOKEN)
-├── 📋 .gitignore           # Arquivos ignorados pelo Git
-├── 
-├── 📂 Python/              # Módulos do bot (Cogs)
-│   ├── boasvindas.py      # Sistema de boas-vindas
-│   ├── cadastro.py        # Auto-roles por reação
-│   ├── info.py            # Comandos de ajuda
-│   ├── interacoes.py      # Interações automáticas
-│   ├── logger.py          # Sistema de logging
-│   ├── Logs.py            # Eventos de auditoria
-│   ├── Moderacao.py       # Sistema de moderação
-│   └── Util.py            # Comandos utilitários
-│
-├── 📂 docs/                # Documentação
-│   ├── README.md          # Documentação completa
-│   ├── STATUS.md          # Status do projeto
-│   ├── TROUBLESHOOTING.md # Solução de problemas
-│   └── ORGANIZACAO.md     # Estrutura e organização
-│
-├── 📂 scripts/             # Scripts auxiliares
-│   ├── verificar.py       # Verificação do projeto
-│   ├── test_conexao.py    # Teste de conexão
-│   └── dev.sh             # Script de desenvolvimento
-│
-└── 📂 data/                # Dados persistentes
-    └── warns.json         # Advertências dos usuários
-```
-
-## ✨ Funcionalidades
-
-- 🛡️ **Moderação Completa** - Warns, mutes, kicks, bans
-- 🤖 **Anti-Spam Automático** - Detecta e pune spam
-- 👋 **Boas-Vindas** - Mensagens automáticas personalizadas
-- 🎭 **Auto-Roles** - Sistema de cargos por reação
-- ⭐ **Sistema de Níveis e XP** - Ganhe experiência conversando
-- 📊 **Logs Completos** - Auditoria de todas ações
-- 🎮 **Comandos Divertidos** - Jogos e interações
-- ⚙️ **Altamente Configurável** - Tudo em config.py
-
-## 📋 Comandos Principais
-
-| Categoria | Comandos |
-|-----------|----------|
-| 🛡️ Moderação | `!warn`, `!mute`, `!kick`, `!ban`, `!limpar` |
-| ⭐ Níveis & XP | `!perfil`, `!ranking`, `!conquistas`, `!editarperfil` |
-| 🏆 Admin XP | `!addxp`, `!resetperfil` |
-| ℹ️ Informação | `!ajuda`, `!userinfo`, `!serverinfo` |
-| 🎮 Diversão | `!coinflip`, `!dado`, `!8ball`, `!sorteio` |
-| ⚙️ Utilitários | `!avatar`, `!ping`, `!votacao` |
-
-Use `!ajuda` no Discord para ver todos os comandos!
-
-### 1. Obter Token do Bot
-
-- Acesse [Discord Developer Portal](https://discord.com/developers/applications)
-- Crie um novo Application
-- Vá em **Bot** → **Reset Token**
-- Copie o token e adicione no arquivo `.env`:
-  ```env
-  DISCORD_TOKEN=seu_token_aqui
-  ```
-
-### 2. Configurar IDs do Servidor
-
-Edite o arquivo [`config.py`](config.py) com os IDs do seu servidor:
-- Ative **Modo Desenvolvedor** no Discord (Configurações → Avançado)
-- Clique com botão direito → **Copiar ID**
-- Configure: `GUILD_ID`, canais e cargos
-
-### 3. Convidar Bot
-
-- OAuth2 → **URL Generator**
-- Selecione: `bot`, `applications.commands`
-- Permissões: `Administrator`
-- Use o link gerado para adicionar ao servidor
-
-### 4. Ativar Intents (⚠️ OBRIGATÓRIO)
-
-No [Discord Developer Portal](https://discord.com/developers/applications):
-- Bot → **Privileged Gateway Intents**
-- ✅ **Message Content Intent** (obrigatório)
-- ✅ Server Members Intent
-- ✅ Presence Intent
-
-### 5. Deploy
-
-**Discloud (Recomendado):**
-- Faça upload de todos os arquivos incluindo `.env`
-- O `discloud.config` já está configurado
-
-**Replit:**
-- Configure `DISCORD_TOKEN` nos Secrets
-- Execute normalmentent Intent** ⚠️ Obrigatório
-   - Ative Server Members Intent
-   - Ative Presence Intent
-
-## 💡 Primeiros Comandos
-
-Após o bot estar online:
-
-```discord
-!setupmute              # Configura sistema de mute
-!criar_mensagem_cadastro # Cria mensagem de auto-roles
-!add_reacoes            # Adiciona reações na mensagem
-!ping                   # Testa funcionamento
-```
-
-## 🆘 Suporte
-
-Problemas? Consulte a [documentação completa](docs/TROUBLESHOOTING.md) ou execute:
-
-```bash
-./scripts/dev.sh verificar
-```
-
-## 👨‍💻 Desenvolvimento
-
-```bash
-# Verificar estrutura
-./scripts/dev.sh verificar
-
-# Testar sintaxe
-./scripts/dev.sh sintaxe
-
-# Limpar cache
-./scripts/dev.sh limpar
-
-# Criar backup
-./scripts/dev.sh backup
-```
-
-## 📊 Estatísticas
-
-- **Linhas de código:** 1500+
-- **Comandos:** 40+
-- **Sistemas:** 7
-- **Eventos monitorados:** 15+
-
-## 📜 Licença
-
-Este projeto é de código aberto para uso pessoal e educacional.
-
-## 👤 Autor
-
-**William MC Flores**
-- GitHub: [@William-MC-Flores](https://github.com/William-MC-Flores)
-- Repositório: [XiruAftonzera_Bot-Discord](https://github.com/William-MC-Flores/XiruAftonzera_Bot-Discord)
+</div>
 
 ---
 
-⭐ Se este projeto foi útil, considere dar uma estrela!
+## ✨ Características
 
-**Status:** ✅ Pronto para produção | **Versão:** 1.2.1
+### 🛡️ Moderação
+- Sistema de **warns** com punições automáticas
+- **Anti-spam** inteligente
+- Comandos de **mute**, **kick** e **ban**
+- **Logs** completos de auditoria
+- **Bulk delete** de mensagens
+
+### 🎮 Gamificação
+- Sistema de **XP e níveis**
+- **12 conquistas** desbloqueáveis
+- **Ranking** de usuários
+- Rastreamento de **tempo em voz**
+- Contador de **mensagens**
+
+### 💰 Economia
+- Sistema de **moedas**
+- **Loja virtual** com 31 itens
+- **Banners**, cores e títulos personalizados
+- **Daily rewards** e trabalho
+- **Inventário** de itens
+
+### 🎨 Personalização
+- **Perfis customizáveis** com banners locais
+- **5 cores** de perfil
+- **11 banners** (Gaucho themed)
+- **Títulos** e **badges** exclusivos
+- Bio e status personalizados
+
+### 🤖 Automação
+- **Boas-vindas** automáticas
+- **Auto-roles** via reação
+- **30+ respostas** automáticas
+- Sistema de **backup** automático
+- **Keep-alive** para uptime 24/7
+
+---
+
+## 🚀 Instalação
+
+### ☁️ Discloud (Recomendado)
+
+1. **Configure o token:**
+   ```bash
+   echo "DISCORD_TOKEN=seu_token_aqui" > .env
+   ```
+
+2. **Faça upload:**
+   - Acesse [Discloud](https://discloud.app)
+   - Upload o projeto completo
+   - ✅ Pronto! Bot online 24/7
+
+### 🔄 Replit
+
+1. Adicione `DISCORD_TOKEN` nos **Secrets**
+2. Clique em **Run**
+3. ✅ Bot rodando!
+
+### 💻 Local
+
+```bash
+# Clone o repositório
+git clone <seu-repo>
+cd XiruAftonzera_Bot-Discord
+
+# Instale dependências
+pip install -r requirements.txt
+
+# Configure .env
+echo "DISCORD_TOKEN=seu_token_aqui" > .env
+
+# Execute
+python3 main.py
+```
+
+---
+
+## 📚 Documentação
+
+### �� Guias
+- [Guia de Uso](docs/guias/GUIA_DE_USO.md) - Como usar o bot
+- [Banners](docs/guias/GUIA_RAPIDO_BANNERS.md) - Sistema de banners
+- [XP e Níveis](docs/guias/GUIA_RAPIDO_XP.md) - Como funciona o XP
+
+### 🔧 Técnica
+- [Estrutura](docs/ESTRUTURA.md) - Organização do projeto
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Solução de problemas
+- [Status](docs/STATUS.md) - Estado do projeto
+
+### 👨‍💻 Desenvolvimento
+- [Contributing](CONTRIBUTING.md) - Como contribuir
+- [Revisão de Código](docs/desenvolvimento/REVISAO_CODIGO.md)
+- [Organização](docs/ORGANIZACAO.md)
+
+---
+
+## 🎯 Comandos
+
+### 🛡️ Moderação
+\`\`\`
+!warn @usuário [motivo]     # Advertir usuário
+!verwarns @usuário          # Ver advertências
+!mute @usuário [tempo]      # Silenciar usuário
+!kick @usuário [motivo]     # Expulsar usuário
+!ban @usuário [motivo]      # Banir usuário
+!limpar [quantidade]        # Deletar mensagens
+\`\`\`
+
+### ⭐ Níveis e XP
+\`\`\`
+!perfil [@usuário]          # Ver perfil
+!ranking [página]           # Ranking de XP
+!top                        # Top 10
+!conquistas [@usuário]      # Ver conquistas
+\`\`\`
+
+### 💰 Economia
+\`\`\`
+!moedas [@usuário]          # Ver moedas
+!daily                      # Recompensa diária
+!trabalhar                  # Ganhar moedas
+!loja [categoria]           # Ver loja
+!comprar <ID>               # Comprar item
+!inventario [@usuário]      # Ver inventário
+!usaritem <ID>              # Usar/equipar item
+\`\`\`
+
+### 🎨 Personalização
+\`\`\`
+!customizar cor #HEXCODE    # Mudar cor do perfil
+!customizar titulo <texto>  # Definir título
+!editarperfil bio <texto>   # Definir bio
+!editarperfil status <texto># Definir status
+\`\`\`
+
+### 🛠️ Utilitários
+\`\`\`
+!ajuda [categoria]          # Central de ajuda
+!ping                       # Latência do bot
+!servidor                   # Info do servidor
+!avatar [@usuário]          # Avatar de usuário
+!votacao <pergunta>         # Criar votação
+!sorteio <tempo> <premio>   # Criar sorteio
+\`\`\`
+
+**Ver todos:** \`!ajuda\`
+
+---
+
+## 🏆 Conquistas
+
+Sistema com **12 conquistas** baseadas em:
+- 💬 **Mensagens** (100, 1000, 5000)
+- ⭐ **Níveis** (5, 10, 20)
+- 💎 **XP** (1000, 5000, 10000)
+- 🎤 **Tempo em voz** (10 horas)
+- 🎂 **Tempo no servidor** (1 ano)
+- 🛒 **Compras** (primeira, 10 itens)
+
+---
+
+## 🏪 Loja Virtual
+
+### 31 Itens Disponíveis
+
+- **11 Banners** (5 genéricos + 6 Gaucho themed)
+- **5 Cores** de perfil
+- **5 Badges** exclusivos
+- **4 Cargos** especiais
+- **3 Títulos** personalizados
+- **3 Boosts** temporários
+
+**Preços:** 100 - 800 moedas
+
+---
+
+## 📊 Estatísticas
+
+- 📝 **~4,162** linhas de código
+- 🤖 **48+** comandos
+- 🎯 **12** conquistas
+- 🛒 **31** itens na loja
+- 🗂️ **5** tabelas no banco
+- 🧩 **9** módulos (cogs)
+
+---
+
+## 🛠️ Tecnologias
+
+- **[Python 3.10+](https://python.org)**
+- **[discord.py 2.3.2+](https://discordpy.readthedocs.io)**
+- **[SQLite3](https://sqlite.org)** - Banco de dados
+- **[python-dotenv](https://pypi.org/project/python-dotenv/)** - Variáveis de ambiente
+
+---
+
+## 📁 Estrutura
+
+\`\`\`
+XiruAftonzera_Bot-Discord/
+├── cogs/              # Módulos do bot
+├── data/              # Banco de dados
+├── images/            # Assets (banners)
+├── docs/              # Documentação
+│   ├── guias/
+│   ├── desenvolvimento/
+│   └── changelog/
+├── scripts/           # Scripts utilitários
+├── main.py            # Arquivo principal
+└── config.py          # Configurações
+\`\`\`
+
+**[Ver estrutura completa](docs/ESTRUTURA.md)**
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Veja o [Guia de Contribuição](CONTRIBUTING.md).
+
+### Como ajudar:
+- 🐛 Reportar bugs
+- ✨ Sugerir features
+- 📝 Melhorar documentação
+- 💻 Contribuir com código
+
+---
+
+## 📜 Licença
+
+Este projeto foi criado para uso privado. Sinta-se livre para usar como referência.
+
+---
+
+## 📞 Suporte
+
+- 📖 [Documentação](docs/README.md)
+- 🔧 [Troubleshooting](docs/TROUBLESHOOTING.md)
+- 💬 Abra uma **Issue** para bugs ou dúvidas
+
+---
+
+<div align="center">
+
+**Feito com 💚 para a comunidade Gaucha** 🧉
+
+[![Discord.py](https://img.shields.io/badge/discord.py-2.3.2+-blue.svg)](https://github.com/Rapptz/discord.py)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
+</div>
