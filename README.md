@@ -32,7 +32,7 @@
 
 ### 💰 Economia
 - Sistema de **moedas**
-- **Loja virtual** com 31 itens
+- **Loja virtual** com 26 itens
 - **Banners**, cores e títulos personalizados
 - **Daily rewards** e trabalho
 - **Inventário** de itens
@@ -40,7 +40,7 @@
 ### 🎨 Personalização
 - **Perfis customizáveis** com banners locais
 - **5 cores** de perfil
-- **11 banners** (Gaucho themed)
+- **6 banners** (Gaucho themed)
 - **Títulos** e **badges** exclusivos
 - Bio e status personalizados
 
@@ -178,9 +178,9 @@ Sistema com **12 conquistas** baseadas em:
 
 ## 🏪 Loja Virtual
 
-### 31 Itens Disponíveis
+### 26 Itens Disponíveis
 
-- **11 Banners** (5 genéricos + 6 Gaucho themed)
+- **6 Banners** (Gaucho themed)
 - **5 Cores** de perfil
 - **5 Badges** exclusivos
 - **4 Cargos** especiais
@@ -196,7 +196,7 @@ Sistema com **12 conquistas** baseadas em:
 - 📝 **~4,162** linhas de código
 - 🤖 **48+** comandos
 - 🎯 **12** conquistas
-- 🛒 **31** itens na loja
+- 🛒 **26** itens na loja
 - 🗂️ **5** tabelas no banco
 - 🧩 **9** módulos (cogs)
 

@@ -98,8 +98,8 @@ Total: ~4,162 linhas de código
 - Sistema de XP operacional
 - Voice tracking ativo (conquista "Ativo")
 - Total de mensagens rastreado (conquista "Falador")
-- Banners locais funcionando (11 banners disponíveis)
-- Sistema de loja com 6 categorias (31 itens ativos)
+- Banners locais funcionando (6 banners Gaucho disponíveis)
+- Sistema de loja com 6 categorias (26 itens ativos)
 
 **Melhorias Aplicadas:**
 - Import `os` movido para o topo
@@ -190,8 +190,8 @@ Total: ~4,162 linhas de código
   - `inventario`
 
 ### Loja
-- **Itens ativos:** 31
-  - 11 Banners (5 placeholders + 6 Gaucho)
+- **Itens ativos:** 26
+  - 6 Banners (Gaucho themed)
   - 5 Cores
   - 5 Badges
   - 4 Cargos
@@ -275,7 +275,7 @@ O código do bot está **limpo, organizado e funcional**. Todos os sistemas prin
 - ✅ 0 imports duplicados dentro de funções
 - ✅ 48+ comandos funcionais
 - ✅ 12 conquistas ativas
-- ✅ 31 itens na loja
+- ✅ 26 itens na loja
 - ✅ Sistema de backup implementado
 - ✅ Database protegido do Git
 

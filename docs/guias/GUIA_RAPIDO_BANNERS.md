@@ -2,7 +2,7 @@
 
 ## 🖼️ Novos Banners Gaúchos Adicionados
 
-✅ **11 banners** agora disponíveis na loja!
+✅ **6 banners** Gaucho agora disponíveis na loja!
 
 ### Banners Temáticos Gaúchos (NOVOS):
 - 🐴 **Banner Cavalo Crioulo** - 500 moedas
@@ -125,6 +125,6 @@ python main.py
 
 ---
 
-**Total de itens na loja:** 31 itens  
-**Banners disponíveis:** 11 banners  
+**Total de itens na loja:** 26 itens  
+**Banners disponíveis:** 6 banners Gaucho  
 **Sistema de backup:** ✅ Ativo
