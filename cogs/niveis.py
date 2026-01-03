@@ -280,9 +280,10 @@ class SistemaNiveis(commands.Cog):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Busca usuário com todos os campos
+        # Busca usuário com TODOS os campos de customização
         cursor.execute('''
-            SELECT id_discord, nome, xp, nivel, moedas, bio, status_personalizado, data_criacao 
+            SELECT id_discord, nome, xp, nivel, moedas, bio, status_personalizado, data_criacao,
+                   cor_perfil, banner_perfil, titulo_perfil, item_ativo_borda, item_ativo_fundo
             FROM usuarios WHERE id_discord = ?
         ''', (user_id,))
         resultado = cursor.fetchone()
@@ -305,7 +306,12 @@ class SistemaNiveis(commands.Cog):
                 'moedas': resultado[4],
                 'bio': resultado[5] or '',
                 'status_personalizado': resultado[6] or '',
-                'data_criacao': resultado[7]
+                'data_criacao': resultado[7],
+                'cor_perfil': resultado[8] or '#7289DA',
+                'banner_perfil': resultado[9] or '',
+                'titulo_perfil': resultado[10] or '',
+                'item_ativo_borda': resultado[11] or '',
+                'item_ativo_fundo': resultado[12] or ''
             }
         else:
             # Cria novo usuário
@@ -315,9 +321,10 @@ class SistemaNiveis(commands.Cog):
             ''', (user_id, nome))
             conn.commit()
             
-            # Busca o usuário criado para pegar a data
+            # Busca o usuário criado para pegar TODOS os dados
             cursor.execute('''
-                SELECT id_discord, nome, xp, nivel, moedas, bio, status_personalizado, data_criacao 
+                SELECT id_discord, nome, xp, nivel, moedas, bio, status_personalizado, data_criacao,
+                       cor_perfil, banner_perfil, titulo_perfil, item_ativo_borda, item_ativo_fundo
                 FROM usuarios WHERE id_discord = ?
             ''', (user_id,))
             resultado = cursor.fetchone()
@@ -330,7 +337,12 @@ class SistemaNiveis(commands.Cog):
                 'moedas': 0,
                 'bio': '',
                 'status_personalizado': '',
-                'data_criacao': resultado[7] if resultado else None
+                'data_criacao': resultado[7] if resultado else None,
+                'cor_perfil': resultado[8] if resultado else '#7289DA',
+                'banner_perfil': resultado[9] if resultado else '',
+                'titulo_perfil': resultado[10] if resultado else '',
+                'item_ativo_borda': resultado[11] if resultado else '',
+                'item_ativo_fundo': resultado[12] if resultado else ''
             }
         
         conn.close()
@@ -690,102 +702,107 @@ class SistemaNiveis(commands.Cog):
         except:
             cor_embed = membro.color if membro.color != discord.Color.default() else discord.Color.blue()
         
-        # Título personalizado (se houver)
-        titulo_display = f"📊 {usuario.get('titulo_perfil', '')} {membro.display_name}".strip() if usuario.get('titulo_perfil') else f"📊 Perfil de {membro.display_name}"
+        embed = discord.Embed(color=cor_embed)
         
-        embed = discord.Embed(
-            title=titulo_display,
-            color=cor_embed
-        )
-        
+        # FOTO DE PERFIL GRANDE (thumbnail no canto)
         avatar_url = membro.avatar.url if membro.avatar else membro.default_avatar.url
         embed.set_thumbnail(url=avatar_url)
         
-        # Banner personalizado (SOMENTE arquivos locais, não URLs)
+        # NOME EM DESTAQUE (título grande)
+        embed.title = f"# {membro.display_name}"
+        
+        # DESCRIÇÃO: Títulos, Badges, Status e Bio
+        descricao_parts = []
+        
+        if usuario.get('titulo_perfil'):
+            descricao_parts.append(f"### 👑 {usuario['titulo_perfil']}")
+        
+        if usuario.get('item_ativo_borda'):
+            descricao_parts.append(f"🏅 **{usuario['item_ativo_borda']}**")
+        
+        if usuario.get('status_personalizado'):
+            descricao_parts.append(f"💬 *{usuario['status_personalizado']}*")
+        
+        if usuario.get('bio'):
+            if descricao_parts:
+                descricao_parts.append("")  # Linha em branco
+            descricao_parts.append(f"📝 {usuario['bio']}")
+        
+        if descricao_parts:
+            embed.description = "\n".join(descricao_parts)
+        
+        # ═══════════════════════════════════════
+        # 📊 ESTATÍSTICAS
+        # ═══════════════════════════════════════
+        
+        embed.add_field(
+            name="⭐ Nível",
+            value=f"```yaml\n{nivel_atual}```",
+            inline=True
+        )
+        embed.add_field(
+            name="💎 XP Total",
+            value=f"```yaml\n{xp_atual:,}```",
+            inline=True
+        )
+        embed.add_field(
+            name="💰 Moedas",
+            value=f"```yaml\n{usuario['moedas']:,}```",
+            inline=True
+        )
+        
+        # Divisória visual
+        embed.add_field(
+            name="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            value="",
+            inline=False
+        )
+        
+        # 📈 PROGRESSO
+        embed.add_field(
+            name=f"📈 Progresso para Nível {nivel_atual + 1}",
+            value=f"{barra} **{progresso:.1f}%**\n```diff\n+ {xp_no_nivel:,} / {xp_para_nivel:,} XP\n- Faltam {xp_necessario:,} XP```",
+            inline=False
+        )
+        
+        # 🏆 CONQUISTAS
+        if conquistas:
+            conquistas_texto = " ".join([f"{emoji}" for emoji, nome in conquistas[:12]])
+            total_conquistas = len(conquistas)
+            if total_conquistas > 12:
+                conquistas_texto += f" **+{total_conquistas - 12}**"
+            
+            # Divisória visual
+            embed.add_field(
+                name="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                value="",
+                inline=False
+            )
+            
+            embed.add_field(
+                name=f"🏆 Conquistas Desbloqueadas ({total_conquistas})",
+                value=conquistas_texto,
+                inline=False
+            )
+        
+        # 🎨 BANNER NO FINAL
         arquivo_banner = None
         if usuario.get('banner_perfil'):
-            # banner_perfil agora guarda o nome do arquivo, não URL
             caminho_banner = f"images/{usuario['banner_perfil']}"
             if os.path.exists(caminho_banner):
                 arquivo_banner = discord.File(caminho_banner, filename="banner.png")
                 embed.set_image(url="attachment://banner.png")
         
-        # Status personalizado (se houver)
-        if usuario.get('status_personalizado'):
-            embed.description = f"💬 *{usuario['status_personalizado']}*"
-        
-        # Bio personalizada (se houver)
-        if usuario.get('bio'):
-            embed.add_field(
-                name="📝 Bio",
-                value=usuario['bio'],
-                inline=False
-            )
-        
-        # Itens ativos (se houver)
-        itens_ativos = []
-        if usuario.get('item_ativo_borda'):
-            itens_ativos.append(f"🖼️ {usuario['item_ativo_borda']}")
-        if usuario.get('item_ativo_fundo'):
-            itens_ativos.append(f"🎨 {usuario['item_ativo_fundo']}")
-        
-        if itens_ativos:
-            embed.add_field(
-                name="✨ Itens Ativos",
-                value="\n".join(itens_ativos),
-                inline=False
-            )
-        
-        embed.add_field(
-            name="⭐ Nível",
-            value=f"**{nivel_atual}**",
-            inline=True
-        )
-        embed.add_field(
-            name="💎 XP Total",
-            value=f"**{xp_atual:,}**",
-            inline=True
-        )
-        embed.add_field(
-            name="💰 Moedas",
-            value=f"**{usuario['moedas']:,}**",
-            inline=True
-        )
-        embed.add_field(
-            name="🎯 Próximo Nível",
-            value=f"**{nivel_atual + 1}**",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="📈 Progresso para o próximo nível",
-            value=f"{barra} {progresso:.1f}%\n"
-                  f"`{xp_no_nivel:,} / {xp_para_nivel:,} XP` (faltam {xp_necessario:,} XP)",
-            inline=False
-        )
-        
-        # Mostra conquistas (máximo 5 mais recentes)
-        if conquistas:
-            conquistas_texto = " ".join([f"{emoji}" for emoji, nome in conquistas[:5]])
-            total_conquistas = len(conquistas)
-            if total_conquistas > 5:
-                conquistas_texto += f" **+{total_conquistas - 5}**"
-            
-            embed.add_field(
-                name=f"🏆 Conquistas ({total_conquistas})",
-                value=conquistas_texto,
-                inline=False
-            )
-        
-        # Data de criação do perfil
+        # RODAPÉ
+        footer_text = f"ID: {membro.id}"
         if usuario.get('data_criacao'):
-            embed.add_field(
-                name="📅 Membro desde",
-                value=f"<t:{int(datetime.fromisoformat(usuario['data_criacao']).timestamp())}:D>",
-                inline=False
-            )
+            try:
+                data_formatada = datetime.fromisoformat(usuario['data_criacao']).strftime('%d/%m/%Y')
+                footer_text = f"📅 Membro desde {data_formatada} • {footer_text}"
+            except:
+                pass
         
-        embed.set_footer(text=f"ID: {membro.id} • Use !customizar para personalizar")
+        embed.set_footer(text=footer_text)
         
         # Envia com arquivo de banner se existir
         if arquivo_banner:
@@ -1389,6 +1406,13 @@ class SistemaNiveis(commands.Cog):
                 conn.close()
                 return
             
+            # Verifica se o arquivo existe
+            caminho_banner = f"images/{arquivo}"
+            if not os.path.exists(caminho_banner):
+                await ctx.send(f"❌ Arquivo do banner não encontrado: `{arquivo}`\n💡 Entre em contato com um administrador.")
+                conn.close()
+                return
+            
             cursor.execute('''
                 UPDATE usuarios 
                 SET banner_perfil = ?, ultima_atualizacao = CURRENT_TIMESTAMP
@@ -1398,19 +1422,24 @@ class SistemaNiveis(commands.Cog):
             conn.close()
             
             embed = discord.Embed(
-                title="✅ Banner Aplicado!",
-                description=f"**{nome_item}** agora é seu banner de perfil!",
+                title="✅ Banner Equipado!",
+                description=f"🖼️ **{nome_item}** agora é seu banner de perfil!",
                 color=discord.Color.green()
             )
-            embed.set_footer(text="Use !perfil para ver as mudanças")
+            embed.add_field(
+                name="💡 Como visualizar",
+                value="Use `!perfil` para ver seu perfil completo com o novo banner!",
+                inline=False
+            )
+            embed.set_footer(text=f"Item ID: {id_item} | Use !equipados para ver todos os itens ativos")
             
-            # Tenta mostrar preview do banner
-            caminho_banner = f"images/{arquivo}"
-            if os.path.exists(caminho_banner):
-                arquivo_preview = discord.File(caminho_banner, filename="preview.png")
-                embed.set_image(url="attachment://preview.png")
+            # Mostra preview do banner
+            try:
+                arquivo_preview = discord.File(caminho_banner, filename="banner_preview.png")
+                embed.set_image(url="attachment://banner_preview.png")
                 await ctx.send(embed=embed, file=arquivo_preview)
-            else:
+            except Exception as e:
+                print(f"Erro ao enviar preview: {e}")
                 await ctx.send(embed=embed)
         
         elif tipo_item == "cor":
@@ -1757,7 +1786,7 @@ class SistemaNiveis(commands.Cog):
     @commands.command(name='inventario', aliases=['inv', 'inventário', 'bag'])
     async def inventario(self, ctx, membro: discord.Member = None):
         """
-        Mostra o inventário de itens
+        Mostra o inventário de itens com IDs para equipar
         
         Uso: !inventario [@usuário]
         """
@@ -1766,15 +1795,22 @@ class SistemaNiveis(commands.Cog):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Busca itens do inventário agrupados por tipo
+        # Busca itens do inventário com IDs
         cursor.execute('''
-            SELECT l.tipo_item, l.nome_item, l.preco, i.quantidade, i.data_compra
+            SELECT l.id, l.tipo_item, l.nome_item, l.preco, i.quantidade, i.data_compra, l.arquivo
             FROM inventario i
             JOIN loja l ON i.id_item = l.id
             WHERE i.id_discord = ?
-            ORDER BY l.tipo_item, i.data_compra DESC
+            ORDER BY l.tipo_item, l.preco DESC
         ''', (membro.id,))
         itens = cursor.fetchall()
+        
+        # Busca itens equipados
+        cursor.execute('''
+            SELECT cor_perfil, banner_perfil, titulo_perfil, item_ativo_borda
+            FROM usuarios WHERE id_discord = ?
+        ''', (membro.id,))
+        equipados = cursor.fetchone()
         conn.close()
         
         embed = discord.Embed(
@@ -1786,42 +1822,53 @@ class SistemaNiveis(commands.Cog):
         embed.set_thumbnail(url=avatar_url)
         
         if not itens:
-            embed.description = "Inventário vazio! Visite a loja com `!loja`"
+            embed.description = "📭 Inventário vazio!\n\n💡 Visite a loja com `!loja` para comprar itens"
         else:
             # Agrupa itens por categoria
             categorias = {}
             total_valor = 0
             total_itens = 0
             
-            for tipo, nome, preco, qtd, data in itens:
+            for item_id, tipo, nome, preco, qtd, data, arquivo in itens:
                 if tipo not in categorias:
                     categorias[tipo] = []
-                categorias[tipo].append((nome, preco, qtd))
+                categorias[tipo].append((item_id, nome, preco, qtd, arquivo))
                 total_valor += preco * qtd
                 total_itens += qtd
             
             # Exibe estatísticas gerais
-            embed.description = f"📦 Total de itens: **{total_itens}**\n💰 Valor total: **{total_valor:,}** moedas"
+            embed.description = f"📦 **{total_itens}** itens | 💰 Valor: **{total_valor:,}** moedas\n💡 Use `!usaritem <ID>` para equipar"
             
             # Emojis por categoria
             emoji_tipo = {
-                "decoração": "✨",
+                "banner": "🖼️",
+                "cor": "🎨",
+                "titulo": "👑",
                 "badge": "🏅",
-                "cargo": "👑",
-                "boost": "⚡",
-                "item": "📦"
+                "cargo": "⚔️",
+                "boost": "⚡"
             }
             
+            # Verifica o que está equipado
+            cor_equipada, banner_equipado, titulo_equipado, badge_equipada = equipados if equipados else ('', '', '', '')
+            
             # Exibe itens por categoria
-            for tipo, lista_itens in categorias.items():
+            for tipo, lista_itens in sorted(categorias.items()):
                 emoji = emoji_tipo.get(tipo, "🎁")
                 itens_texto = []
                 
-                for nome, preco, qtd in lista_itens:
-                    if qtd > 1:
-                        itens_texto.append(f"• **{nome}** x{qtd}")
-                    else:
-                        itens_texto.append(f"• **{nome}**")
+                for item_id, nome, preco, qtd, arquivo in lista_itens:
+                    # Marca se está equipado
+                    equipado = ""
+                    if tipo == "banner" and arquivo and banner_equipado == arquivo:
+                        equipado = " ✅"
+                    elif tipo == "titulo" and titulo_equipado and nome.replace("Título ", "") in titulo_equipado:
+                        equipado = " ✅"
+                    elif tipo == "badge" and badge_equipada == nome:
+                        equipado = " ✅"
+                    
+                    qtd_texto = f" x{qtd}" if qtd > 1 else ""
+                    itens_texto.append(f"`ID {item_id}` • **{nome}**{qtd_texto}{equipado}")
                 
                 embed.add_field(
                     name=f"{emoji} {tipo.title()} ({len(lista_itens)})",
@@ -1829,7 +1876,103 @@ class SistemaNiveis(commands.Cog):
                     inline=False
                 )
         
-        embed.set_footer(text="Use !loja para comprar mais itens")
+        embed.set_footer(text="✅ = Equipado | Use !equipados para ver todos os itens ativos")
+        await ctx.send(embed=embed)
+    
+    @commands.command(name="equipados", aliases=["equipped", "ativos"])
+    async def equipados(self, ctx, membro: discord.Member = None):
+        """
+        Mostra todos os itens equipados no perfil
+        
+        Uso: !equipados [@usuário]
+        """
+        membro = membro or ctx.author
+        
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Busca itens equipados
+        cursor.execute('''
+            SELECT cor_perfil, banner_perfil, titulo_perfil, item_ativo_borda, item_ativo_fundo
+            FROM usuarios WHERE id_discord = ?
+        ''', (membro.id,))
+        equipados = cursor.fetchone()
+        conn.close()
+        
+        if not equipados:
+            await ctx.send("❌ Perfil não encontrado!")
+            return
+        
+        cor_perfil, banner_perfil, titulo_perfil, borda, fundo = equipados
+        
+        # Cria embed com a cor do perfil
+        try:
+            cor_embed = discord.Color.from_str(cor_perfil) if cor_perfil else discord.Color.blue()
+        except:
+            cor_embed = discord.Color.blue()
+        
+        embed = discord.Embed(
+            title=f"✨ Itens Equipados - {membro.display_name}",
+            color=cor_embed
+        )
+        
+        avatar_url = membro.avatar.url if membro.avatar else membro.default_avatar.url
+        embed.set_thumbnail(url=avatar_url)
+        
+        tem_itens = False
+        
+        # Cor do perfil
+        if cor_perfil and cor_perfil != '#7289DA':
+            embed.add_field(
+                name="🎨 Cor do Perfil",
+                value=f"`{cor_perfil}`",
+                inline=True
+            )
+            tem_itens = True
+        
+        # Banner
+        if banner_perfil:
+            nome_banner = banner_perfil.replace('banners/', '').replace('.png', '').replace('_', ' ')
+            embed.add_field(
+                name="🖼️ Banner",
+                value=f"**{nome_banner}**",
+                inline=True
+            )
+            tem_itens = True
+        
+        # Título
+        if titulo_perfil:
+            embed.add_field(
+                name="👑 Título",
+                value=f"**{titulo_perfil}**",
+                inline=True
+            )
+            tem_itens = True
+        
+        # Badge/Borda
+        if borda:
+            embed.add_field(
+                name="🏅 Badge",
+                value=f"**{borda}**",
+                inline=True
+            )
+            tem_itens = True
+        
+        # Fundo
+        if fundo:
+            embed.add_field(
+                name="🎨 Fundo",
+                value=f"**{fundo}**",
+                inline=True
+            )
+            tem_itens = True
+        
+        if not tem_itens:
+            embed.description = "📭 Nenhum item equipado\n\n💡 Compre itens na `!loja` e equipe com `!usaritem <ID>`"
+        else:
+            embed.description = "💡 Use `!usaritem <ID>` para mudar itens ou `!customizar limpar` para remover todos"
+        
+        embed.set_footer(text="Use !inventario para ver todos os seus itens")
         await ctx.send(embed=embed)
     
     @commands.command(name="addmoedas", aliases=["addcoins"])
