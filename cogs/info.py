@@ -268,12 +268,13 @@ class Ajuda(commands.Cog):
             embed.add_field(
                 name="🎨 Categorias da Loja",
                 value=(
-                    "**banner** — Banners de perfil (arquivos locais)\n"
-                    "**cor** — Cores personalizadas de perfil\n"
-                    "**titulo** — Títulos especiais\n"
-                    "**badge** — Badges exclusivas\n"
-                    "**cargo** — Cargos especiais\n"
-                    "**boost** — Multiplicadores de XP/moedas"
+                    "**banner** — 6 banners Gaucho (450-600 moedas)\n"
+                    "**cor** — 5 cores personalizadas de perfil\n"
+                    "**titulo** — 3 títulos especiais\n"
+                    "**badge** — 5 badges exclusivas\n"
+                    "**cargo** — 4 cargos especiais\n"
+                    "**boost** — 3 multiplicadores de XP/moedas\n\n"
+                    "📦 **Total:** 26 itens disponíveis"
                 ),
                 inline=False
             )
