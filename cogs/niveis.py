@@ -190,12 +190,13 @@ class SistemaNiveis(commands.Cog):
         
         # Insere itens padrão da loja se não existirem
         itens_padrao = [
-            # Banners (arquivos locais)
-            ("Banner Espaço", 300, "banner", "Banner temático espacial com estrelas", "banners/espaco.png"),
-            ("Banner Floresta", 250, "banner", "Banner com paisagem de floresta", "banners/floresta.png"),
-            ("Banner Oceano", 280, "banner", "Banner com vista do oceano", "banners/oceano.png"),
-            ("Banner Montanhas", 320, "banner", "Banner com montanhas majestosas", "banners/montanhas.png"),
-            ("Banner Cidade", 350, "banner", "Banner com paisagem urbana", "banners/cidade.png"),
+            # Banners Gaucho (arquivos locais)
+            ("Banner Cavalo Crioulo", 450, "banner", "Banner tradicional gaúcho com Cavalo Crioulo", "banners/Cavalo_Crioulo.png"),
+            ("Banner Costelão", 500, "banner", "Banner gaúcho com churrasco de costelão", "banners/Costelão.png"),
+            ("Banner Gauchada", 480, "banner", "Banner com temática Gauchada", "banners/Gauchada.png"),
+            ("Banner Laçador", 600, "banner", "Banner com o icônico Laçador", "banners/Laçador.png"),
+            ("Banner Proziada", 550, "banner", "Banner temático Proziada", "banners/Proziada.png"),
+            ("Banner Rio Grandence", 520, "banner", "Banner Rio Grandense tradicional", "banners/Rio_Grandence.png"),
             
             # Cores de perfil
             ("Cor Vermelho Fogo", 150, "cor", "Cor vermelha vibrante #FF4444", ""),
